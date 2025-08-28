@@ -96,6 +96,18 @@ export const transactionsAPI = {
   delete: (id: string): Promise<void> =>
     api.delete(`/transactions/${id}`).then(res => res.data),
     
+  export: (params: {
+    format?: 'csv' | 'json';
+    type?: 'income' | 'expense';
+    category?: string;
+    startDate?: string;
+    endDate?: string;
+  } = {}): Promise<Blob> =>
+    api.get('/transactions/export', { 
+      params,
+      responseType: 'blob'
+    }).then(res => res.data),
+    
   uploadReceipt: (id: string, file: File): Promise<{ receiptUrl: string }> => {
     const formData = new FormData();
     formData.append('receipt', file);

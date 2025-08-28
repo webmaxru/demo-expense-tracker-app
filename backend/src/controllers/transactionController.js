@@ -1,5 +1,6 @@
 const { mockDataService } = require('../services/mockDataService');
 const { logger } = require('../utils/logger');
+const { transactionsToCsv, generateExportFilename } = require('../utils/csvHelper');
 const Joi = require('joi');
 
 // Validation schemas
@@ -17,6 +18,14 @@ const updateTransactionSchema = Joi.object({
   categoryId: Joi.string().optional().allow(null),
   date: Joi.date().iso().optional(),
   type: Joi.string().valid('income', 'expense').optional()
+});
+
+const exportTransactionsSchema = Joi.object({
+  format: Joi.string().valid('csv', 'json').default('csv'),
+  type: Joi.string().valid('income', 'expense').optional(),
+  category: Joi.string().optional(),
+  startDate: Joi.date().iso().optional(),
+  endDate: Joi.date().iso().optional()
 });
 
 const transactionController = {
@@ -149,6 +158,50 @@ const transactionController = {
       res.status(204).send();
     } catch (error) {
       logger.error('Error deleting transaction:', error);
+      next(error);
+    }
+  },
+
+  // Export transactions as CSV or JSON
+  exportTransactions: async (req, res, next) => {
+    try {
+      const { error, value } = exportTransactionsSchema.validate(req.query);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+      }
+
+      const userId = req.user.id;
+      const { format, type, category, startDate, endDate } = value;
+
+      // Get filtered transactions
+      const transactions = mockDataService.getTransactions(userId, {
+        type,
+        categoryId: category,
+        startDate,
+        endDate
+      });
+
+      const filename = generateExportFilename(format);
+
+      if (format === 'json') {
+        // JSON export
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        
+        logger.info(`JSON export completed for user: ${userId}, ${transactions.length} transactions`);
+        return res.json(transactions);
+      } else {
+        // CSV export (default)
+        const csvData = transactionsToCsv(transactions);
+        
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        
+        logger.info(`CSV export completed for user: ${userId}, ${transactions.length} transactions`);
+        return res.send(csvData);
+      }
+    } catch (error) {
+      logger.error('Error exporting transactions:', error);
       next(error);
     }
   }

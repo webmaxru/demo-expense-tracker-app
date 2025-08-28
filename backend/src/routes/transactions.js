@@ -8,6 +8,7 @@ router.use(authMiddleware);
 
 // Transaction routes
 router.get('/', transactionController.getTransactions);
+router.get('/export', transactionController.exportTransactions);
 router.get('/:id', transactionController.getTransaction);
 router.post('/', transactionController.createTransaction);
 router.put('/:id', transactionController.updateTransaction);

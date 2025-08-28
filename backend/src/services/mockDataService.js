@@ -4,7 +4,52 @@
 const { v4: uuidv4 } = require('uuid');
 
 // Mock data storage
-let transactions = [];
+let transactions = [
+  {
+    id: 'trans-1',
+    userId: 'user-1',
+    amount: '25.50',
+    description: 'Coffee and breakfast',
+    categoryId: 'cat-1',
+    date: '2024-01-15T00:00:00.000Z',
+    type: 'expense',
+    createdAt: '2024-01-15T10:30:00.000Z',
+    updatedAt: '2024-01-15T10:30:00.000Z'
+  },
+  {
+    id: 'trans-2',
+    userId: 'user-1',
+    amount: '100.00',
+    description: 'Gas station',
+    categoryId: 'cat-2',
+    date: '2024-01-14T00:00:00.000Z',
+    type: 'expense',
+    createdAt: '2024-01-14T15:20:00.000Z',
+    updatedAt: '2024-01-14T15:20:00.000Z'
+  },
+  {
+    id: 'trans-3',
+    userId: 'user-1',
+    amount: '3500.00',
+    description: 'Monthly salary',
+    categoryId: 'cat-3',
+    date: '2024-01-01T00:00:00.000Z',
+    type: 'income',
+    createdAt: '2024-01-01T09:00:00.000Z',
+    updatedAt: '2024-01-01T09:00:00.000Z'
+  },
+  {
+    id: 'trans-4',
+    userId: 'user-1',
+    amount: '45.75',
+    description: 'Grocery shopping with "special" items',
+    categoryId: 'cat-1',
+    date: '2024-01-10T00:00:00.000Z',
+    type: 'expense',
+    createdAt: '2024-01-10T18:45:00.000Z',
+    updatedAt: '2024-01-10T18:45:00.000Z'
+  }
+];
 let categories = [
   {
     id: 'cat-1',
@@ -46,6 +91,18 @@ const mockDataService = {
     
     if (filters.categoryId) {
       filtered = filtered.filter(t => t.categoryId === filters.categoryId);
+    }
+    
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      filtered = filtered.filter(t => new Date(t.date) >= startDate);
+    }
+    
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate);
+      // Make endDate inclusive by adding one day and using <
+      const inclusiveEndDate = new Date(endDate.getTime() + 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(t => new Date(t.date) < inclusiveEndDate);
     }
     
     return filtered

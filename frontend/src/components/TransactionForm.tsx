@@ -49,7 +49,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSuccess, onCancel }
     }
   };
 
-  const handleChange = (field: keyof CreateTransactionRequest, value: any) => {
+  const handleChange = <K extends keyof CreateTransactionRequest>(field: K, value: CreateTransactionRequest[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -69,7 +69,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSuccess, onCancel }
                 type="radio"
                 value="expense"
                 checked={formData.type === 'expense'}
-                onChange={(e) => handleChange('type', e.target.value)}
+                onChange={(e) => handleChange('type', e.target.value as 'income' | 'expense')}
                 className="mr-2"
               />
               <span className="text-red-600">Expense</span>
@@ -79,7 +79,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSuccess, onCancel }
                 type="radio"
                 value="income"
                 checked={formData.type === 'income'}
-                onChange={(e) => handleChange('type', e.target.value)}
+                onChange={(e) => handleChange('type', e.target.value as 'income' | 'expense')}
                 className="mr-2"
               />
               <span className="text-green-600">Income</span>

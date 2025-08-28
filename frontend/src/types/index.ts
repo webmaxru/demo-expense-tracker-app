@@ -100,7 +100,32 @@ export interface DashboardData {
   }>;
 }
 
+export interface SpendingTrends {
+  period: 'week' | 'month' | 'year';
+  trends: Array<{
+    date: string;
+    total: string;
+  }>;
+}
+
+export interface CategoryBreakdown {
+  period: 'week' | 'month' | 'year';
+  breakdown: Array<{
+    category: Category;
+    total: string;
+    percentage: number;
+  }>;
+}
+
+export interface MonthlyReport {
+  month: string;
+  year: string;
+  income: string;
+  expenses: string;
+  transactions: Transaction[];
+}
+
 export interface ApiError {
   error: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }

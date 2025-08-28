@@ -33,17 +33,17 @@ jobs:
       run: npm run build
       
     - name: Run API Tests with Coverage
-      run: npm run test:coverage --workspace=api
+      run: npm run test:coverage --workspace=backend
       
     - name: Generate Coverage Badge
       id: coverage
       run: |
         # Check if coverage file exists, if not set default values
-        if [ -f "api/coverage/coverage-summary.json" ]; then
-          COVERAGE=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.pct // 0')
+        if [ -f "backend/coverage/coverage-summary.json" ]; then
+          COVERAGE=$(cat backend/coverage/coverage-summary.json | jq -r '.total.lines.pct // 0')
         else
           echo "⚠️ Coverage summary not found, checking for coverage files..."
-          ls -la api/coverage/ || echo "No coverage directory found"
+          ls -la backend/coverage/ || echo "No coverage directory found"
           COVERAGE="0"
         fi
         
@@ -63,7 +63,7 @@ jobs:
       with:
         name: coverage-reports-node-${{ matrix.node-version }}
         path: |
-          api/coverage/
+          backend/coverage/
         retention-days: 30
         
     - name: Generate Test Summary
@@ -78,28 +78,28 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         
         # Add coverage table if available
-        if [ -f "api/coverage/coverage-summary.json" ]; then
+        if [ -f "backend/coverage/coverage-summary.json" ]; then
           echo "### 📈 Coverage Breakdown" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Coverage | Covered | Total |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|----------|---------|-------|" >> $GITHUB_STEP_SUMMARY
           
           # Extract coverage data and format as table
-          LINES_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.pct // "0"')
-          LINES_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.covered // "0"')
-          LINES_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.total // "0"')
+          LINES_PCT=$(cat backend/coverage/coverage-summary.json | jq -r '.total.lines.pct // "0"')
+          LINES_COVERED=$(cat backend/coverage/coverage-summary.json | jq -r '.total.lines.covered // "0"')
+          LINES_TOTAL=$(cat backend/coverage/coverage-summary.json | jq -r '.total.lines.total // "0"')
           
-          STATEMENTS_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.statements.pct // "0"')
-          STATEMENTS_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.statements.covered // "0"')
-          STATEMENTS_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.statements.total // "0"')
+          STATEMENTS_PCT=$(cat backend/coverage/coverage-summary.json | jq -r '.total.statements.pct // "0"')
+          STATEMENTS_COVERED=$(cat backend/coverage/coverage-summary.json | jq -r '.total.statements.covered // "0"')
+          STATEMENTS_TOTAL=$(cat backend/coverage/coverage-summary.json | jq -r '.total.statements.total // "0"')
           
-          FUNCTIONS_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.functions.pct // "0"')
-          FUNCTIONS_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.functions.covered // "0"')
-          FUNCTIONS_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.functions.total // "0"')
+          FUNCTIONS_PCT=$(cat backend/coverage/coverage-summary.json | jq -r '.total.functions.pct // "0"')
+          FUNCTIONS_COVERED=$(cat backend/coverage/coverage-summary.json | jq -r '.total.functions.covered // "0"')
+          FUNCTIONS_TOTAL=$(cat backend/coverage/coverage-summary.json | jq -r '.total.functions.total // "0"')
           
-          BRANCHES_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.branches.pct // "0"')
-          BRANCHES_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.branches.covered // "0"')
-          BRANCHES_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.branches.total // "0"')
+          BRANCHES_PCT=$(cat backend/coverage/coverage-summary.json | jq -r '.total.branches.pct // "0"')
+          BRANCHES_COVERED=$(cat backend/coverage/coverage-summary.json | jq -r '.total.branches.covered // "0"')
+          BRANCHES_TOTAL=$(cat backend/coverage/coverage-summary.json | jq -r '.total.branches.total // "0"')
           
           echo "| 📝 Lines | ${LINES_PCT}% | ${LINES_COVERED} | ${LINES_TOTAL} |" >> $GITHUB_STEP_SUMMARY
           echo "| 📋 Statements | ${STATEMENTS_PCT}% | ${STATEMENTS_COVERED} | ${STATEMENTS_TOTAL} |" >> $GITHUB_STEP_SUMMARY

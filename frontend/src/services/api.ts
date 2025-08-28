@@ -11,6 +11,7 @@ import type {
   CreateBudgetRequest,
   DashboardData
 } from '../types';
+import type { SpendingTrends, CategoryBreakdown, MonthlyReport } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -52,7 +53,7 @@ api.interceptors.response.use(
           
           return api(originalRequest);
         }
-      } catch (refreshError) {
+      } catch {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         window.location.href = '/login';
@@ -80,7 +81,7 @@ export const authAPI = {
 
 // Transactions API
 export const transactionsAPI = {
-  getAll: (params?: { page?: number; limit?: number; category?: string }): Promise<{ data: Transaction[]; pagination: any }> =>
+  getAll: (params?: { page?: number; limit?: number; category?: string }): Promise<{ data: Transaction[]; pagination: { page: number; limit: number; total: number } }> =>
     api.get('/transactions', { params }).then(res => res.data),
     
   getById: (id: string): Promise<Transaction> =>
@@ -142,13 +143,13 @@ export const analyticsAPI = {
   getDashboard: (): Promise<DashboardData> =>
     api.get('/analytics/dashboard').then(res => res.data),
     
-  getSpendingTrends: (period: 'week' | 'month' | 'year'): Promise<any> =>
+  getSpendingTrends: (period: 'week' | 'month' | 'year'): Promise<SpendingTrends> =>
     api.get(`/analytics/spending-trends?period=${period}`).then(res => res.data),
     
-  getCategoryBreakdown: (period: 'week' | 'month' | 'year'): Promise<any> =>
+  getCategoryBreakdown: (period: 'week' | 'month' | 'year'): Promise<CategoryBreakdown> =>
     api.get(`/analytics/category-breakdown?period=${period}`).then(res => res.data),
     
-  getMonthlyReport: (month: string, year: string): Promise<any> =>
+  getMonthlyReport: (month: string, year: string): Promise<MonthlyReport> =>
     api.get(`/analytics/monthly-report?month=${month}&year=${year}`).then(res => res.data),
 };
 

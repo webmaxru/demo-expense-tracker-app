@@ -21,10 +21,31 @@ const TransactionList: React.FC = () => {
     },
   });
 
+  // Export CSV mutation
+  const exportMutation = useMutation({
+    mutationFn: transactionsAPI.exportCsv,
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      const today = new Date().toISOString().split('T')[0];
+      a.download = `transactions-${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    },
+  });
+
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleExport = () => {
+    exportMutation.mutate({});
   };
 
   const formatAmount = (amount: string, type: 'income' | 'expense') => {
@@ -72,9 +93,18 @@ const TransactionList: React.FC = () => {
     <div className="card">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold text-gray-900">Recent Transactions</h3>
-        <span className="text-sm text-gray-500">
-          {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
-        </span>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleExport}
+            disabled={exportMutation.isPending || transactions.length === 0}
+            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {exportMutation.isPending ? 'Exporting...' : 'Export CSV'}
+          </button>
+          <span className="text-sm text-gray-500">
+            {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
+          </span>
+        </div>
       </div>
 
       {transactions.length === 0 ? (

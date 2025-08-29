@@ -103,6 +103,12 @@ export const transactionsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     }).then(res => res.data);
   },
+
+  exportCsv: (params?: { category?: string; type?: string }): Promise<Blob> =>
+    api.get('/transactions/export', { 
+      params,
+      responseType: 'blob'
+    }).then(res => res.data),
 };
 
 // Categories API

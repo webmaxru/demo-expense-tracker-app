@@ -104,6 +104,7 @@ demo-expense-tracker-app/
 - [x] Prisma database schema
 - [x] Mock data service for development
 - [x] Transaction management (CRUD operations)
+- [x] CSV export functionality for transactions
 - [x] Dashboard with real-time calculations
 - [x] Error handling middleware
 - [x] Logging configuration
@@ -154,9 +155,37 @@ npm run lint         # Run ESLint
 
 ### Transactions
 - `GET /api/transactions` - Get user transactions
+- `GET /api/transactions/export` - Export transactions as CSV (with optional filters)
 - `POST /api/transactions` - Create transaction
 - `PUT /api/transactions/:id` - Update transaction
 - `DELETE /api/transactions/:id` - Delete transaction
+
+#### CSV Export Endpoint
+**Endpoint:** `GET /api/transactions/export`
+**Authentication:** Required (Bearer token)
+**Query Parameters:**
+- `category` (optional) - Filter by category ID
+- `type` (optional) - Filter by transaction type ('income' or 'expense')
+
+**Response:** CSV file with headers: `id,date,description,category,type,amount`
+**Filename format:** `transactions-YYYY-MM-DD.csv`
+
+**UI Feature:** The TransactionList component includes an "Export CSV" button in the header. The button:
+- Is disabled when there are no transactions
+- Shows "Exporting..." state during download
+- Automatically triggers file download with proper filename
+
+**Example Usage:**
+```bash
+# Export all transactions
+GET /api/transactions/export
+
+# Export only expenses
+GET /api/transactions/export?type=expense
+
+# Export specific category
+GET /api/transactions/export?category=food-category-id
+```
 
 ### Categories
 - `GET /api/categories` - Get user categories

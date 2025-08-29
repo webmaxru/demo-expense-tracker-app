@@ -1,5 +1,6 @@
 const { mockDataService } = require('../services/mockDataService');
 const { logger } = require('../utils/logger');
+const { toCsv } = require('../utils/csv');
 const Joi = require('joi');
 
 // Validation schemas
@@ -149,6 +150,43 @@ const transactionController = {
       res.status(204).send();
     } catch (error) {
       logger.error('Error deleting transaction:', error);
+      next(error);
+    }
+  },
+
+  // Export transactions to CSV
+  exportTransactionsCsv: async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { category, type } = req.query;
+
+      const transactions = mockDataService.getTransactions(userId, {
+        categoryId: category,
+        type
+      });
+
+      const headers = ['id', 'date', 'description', 'category', 'type', 'amount'];
+      const csvContent = toCsv(transactions, headers, (transaction) => [
+        transaction.id,
+        transaction.date ? new Date(transaction.date).toISOString().split('T')[0] : '',
+        transaction.description || '',
+        transaction.category ? transaction.category.name : '',
+        transaction.type,
+        transaction.amount
+      ]);
+
+      const today = new Date().toISOString().split('T')[0];
+      const filename = `transactions-${today}.csv`;
+
+      res.set({
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="${filename}"`
+      });
+
+      logger.info(`Transactions exported to CSV for user: ${userId}`);
+      res.send(csvContent);
+    } catch (error) {
+      logger.error('Error exporting transactions:', error);
       next(error);
     }
   }

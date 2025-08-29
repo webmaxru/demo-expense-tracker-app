@@ -3,10 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { transactionsAPI } from '../services/api';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
+import BudgetForm from '../components/BudgetForm';
+import BudgetList from '../components/BudgetList';
 import type { Transaction } from '../types';
 
 const Dashboard: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBudgetForm, setShowBudgetForm] = useState(false);
 
   // Fetch transactions for dashboard stats
   const { data: transactionData } = useQuery({
@@ -96,12 +99,14 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Transaction Form */}
-        <div>
+        <div className="space-y-6">
           {showAddForm ? (
             <TransactionForm 
               onSuccess={() => setShowAddForm(false)}
               onCancel={() => setShowAddForm(false)}
             />
+          ) : showBudgetForm ? (
+            <BudgetForm onSuccess={() => setShowBudgetForm(false)} onCancel={() => setShowBudgetForm(false)} />
           ) : (
             <div className="card">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
@@ -112,7 +117,7 @@ const Dashboard: React.FC = () => {
                 >
                   Add Transaction
                 </button>
-                <button className="btn-secondary w-full">
+                <button className="btn-secondary w-full" onClick={() => setShowBudgetForm(true)}>
                   Set Budget
                 </button>
                 <button className="btn-secondary w-full">
@@ -121,6 +126,9 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Budgets List */}
+          <BudgetList />
         </div>
 
         {/* Transaction List */}

@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // Mock data storage
 let transactions = [];
+let budgets = [];
 let categories = [
   {
     id: 'cat-1',
@@ -119,6 +120,101 @@ const mockDataService = {
 
   getCategoryById: (id, userId) => {
     return categories.find(c => c.id === id && c.userId === userId);
+  },
+
+  // Budgets
+  getBudgets: (userId) => {
+    return budgets
+      .filter(b => b.userId === userId)
+      .map(b => ({
+        ...b,
+        category: categories.find(c => c.id === b.categoryId)
+      }))
+      .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  },
+
+  getBudgetById: (id, userId) => {
+    const budget = budgets.find(b => b.id === id && b.userId === userId);
+    if (!budget) return null;
+    return {
+      ...budget,
+      category: categories.find(c => c.id === budget.categoryId)
+    };
+  },
+
+  createBudget: (data, userId) => {
+    const budget = {
+      id: uuidv4(),
+      userId,
+      categoryId: data.categoryId,
+      amount: parseFloat(data.amount).toFixed(2),
+      period: data.period,
+      startDate: new Date(data.startDate).toISOString(),
+      endDate: new Date(data.endDate).toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    budgets.push(budget);
+    return {
+      ...budget,
+      category: categories.find(c => c.id === budget.categoryId)
+    };
+  },
+
+  updateBudget: (id, data, userId) => {
+    const index = budgets.findIndex(b => b.id === id && b.userId === userId);
+    if (index === -1) return null;
+
+    budgets[index] = {
+      ...budgets[index],
+      ...data,
+      ...(data.amount && { amount: parseFloat(data.amount).toFixed(2) }),
+      ...(data.startDate && { startDate: new Date(data.startDate).toISOString() }),
+      ...(data.endDate && { endDate: new Date(data.endDate).toISOString() })
+    };
+
+    const updated = budgets[index];
+    return {
+      ...updated,
+      category: categories.find(c => c.id === updated.categoryId)
+    };
+  },
+
+  deleteBudget: (id, userId) => {
+    const index = budgets.findIndex(b => b.id === id && b.userId === userId);
+    if (index === -1) return false;
+    budgets.splice(index, 1);
+    return true;
+  },
+
+  getBudgetProgress: (id, userId) => {
+    const budget = budgets.find(b => b.id === id && b.userId === userId);
+    if (!budget) return null;
+
+    const start = new Date(budget.startDate);
+    const end = new Date(budget.endDate);
+
+    const spent = transactions
+      .filter(t => t.userId === userId && t.type === 'expense')
+      .filter(t => t.categoryId === budget.categoryId)
+      .filter(t => {
+        const d = new Date(t.date);
+        return d >= start && d <= end;
+      })
+      .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+    const amount = parseFloat(budget.amount);
+    const remaining = Math.max(amount - spent, 0);
+    const percentage = amount > 0 ? Math.min((spent / amount) * 100, 100) : 0;
+
+    return {
+      budget: {
+        ...budget,
+        category: categories.find(c => c.id === budget.categoryId)
+      },
+      spent: spent.toFixed(2),
+      remaining: remaining.toFixed(2),
+      percentage: Math.round(percentage)
+    };
   }
 };
 
